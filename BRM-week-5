@@ -216,8 +216,13 @@ question5 <- function(){
   # save the anova in an object using <-
   # report F value in excel
   
+  aov1 <- aov(ds$UnitPrice ~ ds$RatingOrd)
+  summary(aov1)
+  
   # perform TukeyHSD() on this anova
   # ANSWER: print TukeyHSD
+  
+  print(TukeyHSD(aov1))
 }
 question5()
 
@@ -291,6 +296,11 @@ question6<-function(){
   # perform lm as you did in question 4
   # now use relevel to make five stars the reference category
   # ANSWER: print the result using summary()
+  
+  ds$RatingOrd <- relevel(factor(ds$RatingOrd), "***)
+  regression1 <- lm(ds$UnitPrice ~ factor(ds$RatingOrd)) 
+  print(summary(regression1))
+  
 }
 question6()
 ```
