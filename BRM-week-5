@@ -1,0 +1,392 @@
+---
+title: 'BRM1 IBA 2022: Week 5'
+author: "Fill in all student names and team number"
+date: "Last compiled on `r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = 'D:/Data/Dropbox/Meike/BRM1_IBA_2022')
+```
+
+## Before you start, install your working environment 
+- check your working directory
+- remove all objects, start with an empty environment
+
+```{r}
+getwd()
+rm(list=ls()) 
+```
+
+# Assignment week 5 
+Use the online retail data file that you will analyze during the coming two weeks, the description of the variables, and the excel sheets that you need to hand in. You can find the files in the zip file you downloaded in week 1. More information on the file can be found on [kaggle](https://www.kaggle.com/vijayuv/onlineretail). Each team will compare a different combination of an UK region and a country with which this firm trades. Use the datafile that is assigned to your team! 
+
+Read the data file into R using `read.csv`:
+- download data file in your working directory
+- read data file `sep = ''`
+- save data in an R object
+- inspect dataframe
+
+```{r}
+# read in datafile and save in object using <-
+ds <- read.csv("India_Durham.csv", sep = ",")
+```
+
+# 1. Inspect returns
+The company of this data is UK-based, and is interested how their country performs against other countries with whom they trade. As most trade happens in the UK, you will compare a country with a county in United Kingdom. 
+
+Each line is a product being sold by a customer. Each customer has provided a rating for this product at the moment of purchase, both at a 10-point slide line (so continuous scale) and in terms of 1-5 stars (so ordinal scale). 
+
+Some of the products have a negative quantity because they are returned to the store. Create a dummy variable for returns where 1 means a return and 0 if not. Print the table of this dummy and country to inspect how many returns there are per country.
+
+Delete them from the dataset (use indexing and `>=`). Watch my video on [numeric dummy variables](https://www.youtube.com/watch?v=J2eAJG5i84Y).
+
+```{r}
+question1 <- function(){
+  # inspect the number of products that have a negative quantity
+
+  # TIP: use table and <
+  table(ds$Quantity<0)
+  # create a dummy variable and save using <-
+  dummy_rating <- ifelse(ds$Quantity<0, 1, 0)
+  
+  # where 1 is when it is a negative quantity
+  # and 0 elsewhere
+  
+  # ANSWER: print crosstable of country and this dummy
+  table(ds$Country, dummy_rating)
+  # delete these cases from the dataset
+  # save the dataset by df <<- df (change name dataset if you used something else)
+  ds <- ds[ds$Quantity>0,]
+  ds <<- ds
+  # ANSWER: print number of rows after deleting the returns
+  length(ds$Quantity)
+}
+question1()
+```
+
+# 2. Most frequent product
+Each product has a description and stockcode. Some stockcodes include multiple descriptions, for example to indicate different colors (i.e. white ... and cream ...). 
+Inspect the stockcode that is most prevalent in your dataset. Use `table` and save this table into an object so you can access it later. To inspect the most frequent observation in the table, use `max` on your table.
+
+To learn the name of this observation, you need to select from this table only that observation that is equal to the max you found above (I use tab, but maybe you called your table something else): `tab[tab==max(tab)]`. To get to the *most frequently occurring stockcode*, you need to call `names` on this part of the table. Report this stockcode in the excel sheet.
+
+Create a dummy variable equal to 1 if a product has this stockcode and 0 if it has another stockcode using an `ifelse` statement. See `?ifelse`. Watch my video on [ifelse function](https://www.youtube.com/watch?v=G_Q5vbBHsTE). Report the frequencies in the excel file.
+
+Last, print the frequencies for both countries in a crosstable using `table`, where the rows are the countries, and the columns is the dummy variable levels. 
+
+
+```{r}
+question2<-function(){
+  # create a table() of stockcodes
+  # save this into an object using <-
+  table_stock <- table(ds$StockCode)
+  # find the max() of the table
+  # select from the table the max using tab[tab==max(tab)]
+  
+  # replace tab by the name you gave the table
+  # get the names() of this part of the table and report in excel
+  table_stock[table_stock==max(table_stock)]
+  # create a dummy variable to indicate this frequent stockcode 
+  # using ifelse and <-
+  # 1 if it is this code, 0 otherwise
+dummy_stock <- ifelse(ds$StockCode == "22423" | ds$StockCode == "85123A", 1, 0)
+table(dummy_stock)
+  # ANSWER: print table() of this dummy and country
+table(ds$Country, dummy_stock)
+  # where rows are countries, and columns are dummy levels
+}
+question2
+```
+
+
+# 3. Country differences in rating
+`RatingOrd` is a rating score measured at a 5-point scale, i.e. number of stars being given to the product by the customer.
+
+Inspect what the ratings per country using the `table` function where the rows are the countries. 
+
+Report the number of five-star ratings in country 1 in the excel.
+
+```{r}
+question3a <- function(){
+  # first inspect the RatingOrd variable
+  # using a table
+  table(ds$RatingOrd)
+  # then see how many stars rating are given
+  # per country using table() on two variables
+  
+  # report the five stars in the excel
+  # ANSWER: print table
+  table(ds$Country, ds$RatingOrd)
+}
+question3a()
+```
+
+Next, inspect how the prices differ per rating. For `UnitPrice` it is helpful to use a histogram to see how the price differs between the countries. 
+
+Use `hist` and indexing to exclude the higher-priced products, i.e. those with a price equal to or higher than 25 euros. Create two plots, one for each country. 
+
+Give the histogram as `main` title the country name.
+
+```{r}
+question3b<-function(){
+  # create the histogram for products < 25 unit price
+  hist(ds$UnitPrice[ds$UnitPrice<25 & ds$Country == "UK"], main = "UK" )
+  # add title using main= to identify the country
+
+  # ANSWER1: print histogram country 1
+   hist(ds$UnitPrice[ds$UnitPrice<25 & ds$Country == "India"], main = "India" )
+  # ANSWER2: print histogram country 2
+  hist(ds$UnitPrice[ds$UnitPrice<25 & ds$Country == "UK"], main = "UK" )
+}
+question3b()
+```
+To do this per country, you need to use `list` to inspect groups based on two (or more) variables (i.e. `Country` and `RatingOrd`) inside the `tapply` function. 
+
+Inspect the mean prices to answer the questions in the excel file and print the output of the tapply function. Watch my video on [list in the tapply function](https://youtu.be/QQIWAKPRvik). 
+
+
+```{r}
+question3c <- function(){
+  # first inspect the RatingOrd variable
+  # using a table
+  table(ds$RatingOrd)
+  # then see how many stars rating are given
+  # per country using table() on two variables
+  # report the five stars in the excel
+ # haal ff die hashtag weg en zet m daarna weer terug voor het antwoord table(ds$Country, ds$RatingOrd)
+  # do NOT print this table in the final output!
+
+  # Inspect what the unit price is for these countries and ratings
+  # use tapply and list()
+  # ANSWER: print the mean prices per country and ratings
+  tapply(ds$UnitPrice, list(ds$Country, ds$RatingOrd), mean, na.rm = T)
+}
+question3c()
+```
+
+
+# 4. Simple regression
+Perform a simple regression using `lm` where `RatingOrd` explains `UnitPrice`. Note that rating is treated as a factor by R as it contains stars and not numbers. What does the intercept represent? Choose the appropriate answer in excel sheet.
+
+Calculate the absolute mean unit price for 5 stars rated products using the intercept and beta coefficients. You can get the coefficients by `$coeff` from the `lm` object you created above. Report this value in the excel file.
+
+Compare this number with the mean unit price of 1 stars rated products. Can you tell whether this difference is significant? Answer the interpretation questions in the excel sheet.
+
+```{r}
+question4<- function(){
+  # perform the regression using lm() and save in an object using <-
+  # using UnitPrice as dependent variable
+  # and RatingOrd as independent variable
+  # ANSWER: print summary() of this regression
+  
+  # get the coefficients using $coeff from the lm object you've created
+  # ANSWER: calculate the mean price 5 stars rated products
+}  
+question4()
+```
+
+# 5. ANOVA vs simple regression
+Compare the result you obtained in exercise 4 with an ANOVA test on `UnitPrice` with `RatingOrd` as the grouping variable. To which mean all the means are compared in a standard ANOVA test? Report the $F$-value in the excel sheet. 
+
+What is the between variance and what is the within variance? Although you can read this from the ANOVA output, you can also calculate these numbers yourself. The formula for the between variance of groups j= (1,2...k):
+
+$$between=\sum_{j=1}^kn_{j}\left(\overline{X}_{j}-\overline{X}\right)^2$$
+where $\overline{X}$ is the overall mean. Usually one reports the mean square, where you divide by $k-1$. Calculate the between variance yourself. The formula for the within variance is as follows:
+
+$$within=\sum_{j=1}^k \sum_{i=1}^n\left(\overline{X}_{ij}-\overline{X}_{j}\right)^2$$
+
+Calculate the within variance yourself. The division of between and within variance is the F value. Make sure you remove the missings before you start! Check with `aov` calculated above.
+
+Inspect the mean differences using a `TukeyHSD` test. Print these differences. Please watch my video on [TukeyHSD](https://www.youtube.com/watch?v=cKu7kejbvWA).
+
+```{r}
+question5 <- function(){
+  # perform the anova using aov()
+  # use summary() to understand the result
+  # do NOT print this in final solution
+  # save the anova in an object using <-
+  # report F value in excel
+  
+  # perform TukeyHSD() on this anova
+  # ANSWER: print TukeyHSD
+}
+question5()
+
+# OPTIONAL: calculate the anova F value yourself
+# from scratch!
+# Use na.omit to delete all the missing values on unit price and ratingord
+# df.complete <- na.omit()
+
+# save the variables, groups in objects: (remove hashtag!)
+# y <- df.complete$UnitPrice
+# x <- df.complete$RatingOrd
+# groups <- levels(factor(x))
+
+# BETWEEN VARIANCES
+# create a score of between variance of zero
+# between <- 0
+
+for(group in groups){
+  # start for loop
+  # loop over the groups
+  # for each group you will calculate nj 
+  # which is the number of observations in group j (use length())
+  # nj <- 
+  
+  # then you will calculate the group mean using mean() and indexing
+  # groupmean <-
+  # and subtract from each group mean the overall mean of y
+  # square these differences
+  # b <- (groupmean - overallmean)^2
+  
+  # multiply the differences by the number of observations
+  # add this number to between and save it in between:
+  # between <- between + nj*b
+}
+
+# to get mean square of between variance
+# divide the between variance by number of groups - 1 
+# check with aov
+
+# WITHIN VARIANCES
+# create object within and assign 0
+# within <- 0
+
+# use for loop over groups
+for(group in groups){
+  # again calculate the size of the group using length
+  # nj <- 
+  
+  # calculate the mean for each group
+  # groupmean <-
+  # substract the group mean from each observation in that group
+  # w <- (groupmean - ..)^2
+  # sum these
+  # add these across groups to get the within variance
+  # within <- within + sum(w)
+}
+# divide within by the difference between
+# number of observations/number of groups 
+# within / (length(y)-length(groups))
+
+# to get the F value,
+# divide the between by the within
+# between/within
+```
+
+# 6. Reference category
+Re-estimate your regression under 4 by altering the reference category to the five stars (level 5 in `RatingOrd`). Use the `relevel` and report the $F$-value. How would you interpret the intercept now? Watch my video on [relevel](https://www.youtube.com/watch?v=vlnKvEUsEOM). Why did the beta coefficient of 2 stars change?
+
+```{r}
+question6<-function(){
+  # perform lm as you did in question 4
+  # now use relevel to make five stars the reference category
+  # ANSWER: print the result using summary()
+}
+question6()
+```
+
+
+# 7. Multiple regression
+Regress `Rating` and `Country` on `UnitPrice`. Before you start, create a complete dataframe (with only the three variables needed) using `na.omit`, and keep this in a separate object. 
+
+**To make sure R performs standardization on the complete dataset, we will first create a new dataframe of complete cases.** Use `scale` on all *numeric* variables in this complete dataframe to standardize the numeric variables (not the nominal variables!). Watch my video on [standardization](https://www.youtube.com/watch?v=XGBktYjoB0I), [standardized linear regression](https://www.youtube.com/watch?v=f67dNiberF0) and [multiple standardized regression](https://www.youtube.com/watch?v=sIkZ0Vlcm-M). 
+
+Perform the analysis on this new complete dataframe. Save the `lm` object in R. Calculate the mean price in country 2 at a Rating of 0. Which country scores higher in price? Report your answers in the excel sheet.
+
+```{r}
+question7a<-function(){
+  # create a complete dataframe using na.omit
+  # only on the three variables needed: Rating, Country, and UnitPrice
+  
+  # scale all variables
+  # perform linear regression on these variables using lm()
+  # ANSWER: print the summary of this multiple regression
+  
+  # save the lm result in an object (not the summary!) using <<-
+}
+question7a()
+```
+
+Inspect the regression assumptions of the multiple regression. Determine whether the regression assumptions are violated. Watch my video on [regression assumptions](https://www.youtube.com/watch?v=cTXZ8MvT8Is). Print the four plots, and interpret them.
+
+Which plot of the four plots below shows how the errors are distributed? And can you tell whether they are normally distributed? Answer the questions in the excel sheet. If the residuals are not normally distributed, the assumption of normality is violated. In the following exercises a transformation is used in an attempt to make the residuals more normally distributed.
+
+```{r}
+par(mfrow=c(2,2)) # here I make sure to plot 4 graphs next and below to another
+question7b<-function(){
+  # ANSWER: print the lm object you've estimated in question7a
+}
+question7b()
+```
+
+# 8. Log transformation
+Rerun the model you've estimated in exercise 7 but now using a logarithmic scale for the dependent variable with `log()` and do not standardize the numeric variable(s). 
+
+Taking a log of 0 means leads to infinite values. Watch the knowledge clips on canvas to learn how to solve this issue! Instead of a value of 1 take .001. Inspect how the distribution changes using `hist`. Plot the original distribution and the one where you take the logarithm.
+
+Calculate the predicted value for a product in the country that comes alphabetically first for an level of 8.5 in `Rating`. Make sure predicted value is measured at the original scale using `exp()`. 
+
+```{r}
+question8a<-function(){
+  # use the original dataset with nonstandardized variables
+  # ANSWER: print the histogram of unitprice
+  # ANSWER: print histogram of log of unitprice +.001
+}
+question8a()
+
+question8b<-function(){
+  # estimate the lm model like you did in question7a
+  # but now using the unstandardized variables
+  # ANSWER: print the summary of the lm model
+  
+  # use the $coefficients from this regression to estimate the predicted value. 
+  # do NOT print this but report in excel file
+}
+question8b()
+```
+
+# 9. Predict with and without transformation
+Rerun the *unstandardized* regression of exercise 8 but now without the log transformation. 
+
+Calculate the predicted value for a product in the country that comes alphabetically first for a `Rating` of 8.5. This time you do not have to use `exp` since you do not use the logarithmic scale.
+
+Compare with the predicted value based on model estimated in exercise 8. Can you explain the difference? Report the predicted value and choose the correct answer in the excel sheet.
+```{r}
+question9<-function(){
+  # rerun regression of question8b on unstandardized variables
+  # without the log transformation
+  
+  # ANSWER: print the summary of this regression
+  
+  # use the $coefficients from this regression to estimate the predicted value. 
+  # do NOT print this but report in excel file
+}
+question9()
+```
+
+
+**************************************************************************************
+
+## KNIT RMARKDOWN TO PDF FILE TO UPLOAD TO CANVAS
+When you're ready, and you know for sure there are no mistakes in your code, you can try to knit the document. Knitting means that you run all the code chunks consecutively, so what is created in one code chunk might be used in the following chunk. 
+
+If you run into problems, please check the following:
+* Do not use the function install.packages() inside your code (only once to install the package). If you include install.packages, R will try to find a connection and install the package while knitting.
+* If you use functions from packages, you need to install this package before knitting, and use the function library() to be able to use them while knitting
+* Make sure the data and variables names you use, are consistent throughout
+* Check your output after you knitted!
+Please see my instruction video about [knitting](https://www.youtube.com/watch?v=uM-lA3K7wmo).
+
+**************************************************************************************
+
+## CREATE .R FILE TO UPLOAD TO CANVAS
+When you're done with the assignment, please run the following code in the console (the window in which commands and output are printed) to obtain the R document:
+
+knitr::purl("./BRM1-week5.Rmd")
+
+Note that the . represents your current working directory, so make sure the .Rmd file is located in this directory. The R file will be located in the same folder as your R project.
+
+**************************************************************************************
