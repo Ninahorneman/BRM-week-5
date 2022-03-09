@@ -177,12 +177,17 @@ Compare this number with the mean unit price of 1 stars rated products. Can you 
 ```{r}
 question4<- function(){
   # perform the regression using lm() and save in an object using <-
+  lm1 <- lm(ds$UnitPrice ~ ds$RatingOrd)
+ 
   # using UnitPrice as dependent variable
   # and RatingOrd as independent variable
   # ANSWER: print summary() of this regression
-  
+  summary(lm(ds$UnitPrice ~ ds$RatingOrd, na.rm = T))
   # get the coefficients using $coeff from the lm object you've created
+  lm1$coefficients
+  plot(lm1)
   # ANSWER: calculate the mean price 5 stars rated products
+  0.2527+2.8634*....
 }  
 question4()
 ```
