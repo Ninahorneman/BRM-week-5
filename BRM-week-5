@@ -187,7 +187,9 @@ question4<- function(){
   lm1$coefficients
   plot(lm1)
   # ANSWER: calculate the mean price 5 stars rated products
-  0.2527+2.8634*....
+  tapply(ds$UnitPrice, ds$RatingOrd, mean, na.rm = T)
+  mean1 <- 0.2527+2.8634
+  print(mean1)
 }  
 question4()
 ```
