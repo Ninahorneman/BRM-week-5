@@ -79,7 +79,7 @@ Last, print the frequencies for both countries in a crosstable using `table`, wh
 
 ```{r}
 question2<-function(){
-  # create a table() of stockcodes
+   # create a table() of stockcodes
   # save this into an object using <-
   table_stock <- table(ds$StockCode)
   summary(table_stock)
@@ -90,7 +90,7 @@ question2<-function(){
   
   # replace tab by the name you gave the table
   # get the names() of this part of the table and report in excel
-  max <- names(table_stock[table_stock==max(table_stock)])
+table_stock[table_stock==max(table_stock)]
   print(max)
   table_stock[table_stock==max(table_stock)]
   
@@ -98,7 +98,7 @@ question2<-function(){
   # create a dummy variable to indicate this frequent stockcode 
   # using ifelse and <-
   # 1 if it is this code, 0 otherwise
-dummy_stock <- ifelse(ds$StockCode == max, 1, 0)
+dummy_stock <- ifelse(ds$StockCode == 22423, 1, 0)
 table(dummy_stock)
   # ANSWER: print table() of this dummy and country
 table(ds$Country, dummy_stock)
