@@ -82,16 +82,23 @@ question2<-function(){
   # create a table() of stockcodes
   # save this into an object using <-
   table_stock <- table(ds$StockCode)
+  summary(table_stock)
+  ?names
   # find the max() of the table
+  max(table_stock)
   # select from the table the max using tab[tab==max(tab)]
   
   # replace tab by the name you gave the table
   # get the names() of this part of the table and report in excel
+  max <- names(table_stock[table_stock==max(table_stock)])
+  print(max)
   table_stock[table_stock==max(table_stock)]
+  
+  names(table_stock[table_stock==max(table_stock)])
   # create a dummy variable to indicate this frequent stockcode 
   # using ifelse and <-
   # 1 if it is this code, 0 otherwise
-dummy_stock <- ifelse(ds$StockCode == "22423" | ds$StockCode == "85123A", 1, 0)
+dummy_stock <- ifelse(ds$StockCode == max, 1, 0)
 table(dummy_stock)
   # ANSWER: print table() of this dummy and country
 table(ds$Country, dummy_stock)
@@ -188,7 +195,7 @@ question4<- function(){
   plot(lm1)
   # ANSWER: calculate the mean price 5 stars rated products
   tapply(ds$UnitPrice, ds$RatingOrd, mean, na.rm = T)
-  mean1 <- 0.2527+2.8634
+  mean1 <- 0.2526923+2.8633703
   print(mean1)
 }  
 question4()
