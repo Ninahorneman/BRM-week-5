@@ -318,11 +318,21 @@ question7a<-function(){
   # create a complete dataframe using na.omit
   # only on the three variables needed: Rating, Country, and UnitPrice
   
+  ds2 <- na.omit(ds[,c("Rating", "Country", "UnitPrice")])
+  
   # scale all variables
   # perform linear regression on these variables using lm()
+  
+  regression_ds2 <- lm(scale(UnitPrice)~ scale(Rating) + Country, data= ds2)
+    regression_ds2 <<- regression_ds2
+  
   # ANSWER: print the summary of this multiple regression
   
+  print(summary(regression_ds2))
+    summary_regression <- print(summary(regression_ds2))
   # save the lm result in an object (not the summary!) using <<-
+  
+  summary_regression <<- summary_regression
 }
 question7a()
 ```
@@ -335,6 +345,9 @@ Which plot of the four plots below shows how the errors are distributed? And can
 par(mfrow=c(2,2)) # here I make sure to plot 4 graphs next and below to another
 question7b<-function(){
   # ANSWER: print the lm object you've estimated in question7a
+  par(mfrow = c(2,2))
+  
+  plot(regression_ds2)
 }
 question7b()
 ```
@@ -348,9 +361,15 @@ Calculate the predicted value for a product in the country that comes alphabetic
 
 ```{r}
 question8a<-function(){
+question8a<-function(){
   # use the original dataset with nonstandardized variables
   # ANSWER: print the histogram of unitprice
-  # ANSWER: print histogram of log of unitprice +.001
+  
+  hist(ds$UnitPrice)
+  
+  # ANSWER: print histogram of unitprice +.001
+  
+  hist(log(ds$UnitPrice) + 0.001, main = "Histogram Unit price", xlab = "Unit price")
 }
 question8a()
 
@@ -358,6 +377,12 @@ question8b<-function(){
   # estimate the lm model like you did in question7a
   # but now using the unstandardized variables
   # ANSWER: print the summary of the lm model
+  
+  regression_ds <- lm(UnitPrice ~ Rating + Country, data = ds)
+  
+  print(summary(regression_ds))
+  
+  summary_regression_unstandz <<- summary(regression_ds)
   
   # use the $coefficients from this regression to estimate the predicted value. 
   # do NOT print this but report in excel file
